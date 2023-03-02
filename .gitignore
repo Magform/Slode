@@ -1,2 +1,5 @@
 test.mp4
-test/ 
+slide/ 
+slow/
+fast/
+__pycache__/

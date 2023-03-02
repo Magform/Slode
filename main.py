@@ -5,82 +5,56 @@ from PIL import ImageChops
 import math, operator
 import functools
 from datetime import datetime
+import argparse
+import art
+import sys
+#import other file
+import slow
+import fast
 
-def rmsdiff(im1, im2):
-    h = ImageChops.difference(im1, im2).histogram()
-    return math.sqrt(functools.reduce(operator.add,
-        map(lambda h, i: h*(i**2), h, range(256))
-    ) / (float(im1.size[0]) * im1.size[1]))
+parser = argparse.ArgumentParser(description ='Slide from video grabber')
+parser.add_argument('-v', '--video', dest = 'video', 
+                    required = True,
+                    help ='Insert the video name and location (with extension)')
+parser.add_argument('-s', '--speed', dest = 'speed', default ='fast', choices = ['fast', 'slow'],
+                    help ='Insert the speed of the scan (fast or slow), see documentation for more info')
+parser.add_argument('-d', '--directory', dest = 'directory',
+                    default = 'slide',
+                    help ='Slide save location')
+parser.add_argument('-t', '--time', dest = 'time', 
+                    default = '10', type = float,
+                    help ='Enter the minimum duration (in seconds) of a frame to be considered a slide')
+parser.add_argument('-fd', '--frame_difference', dest = 'frame_diffrence', 
+                    default = '40', type = float,
+                    help ='Enter the maximum root-mean-square (RMS) value of the difference between two successive frames to be considered equal')
+args = parser.parse_args()
 
-def equalPart(im1, im2):
-    difference = cv2.subtract(im1, im2)
-    results = cv2.subtract(im1, difference)
-    return results
+video = args.video
+speed = args.speed
+directory = args.directory
+time = args.time
+frameDifference = args.frame_diffrence
 
-directory = input("Chose directory were to save all the slide: ")
-video = input("Enter name of the file to transform in slide: ")
-seconds = input("Insert the number of seconds that need to be equal to grab that as a slide ")
+print(art.text2art("Slode"))
+print("A simple tool to grab slide in a video")
 
-initTime = datetime.now().timestamp()
-
+#create directory if dont exist
 try:
     if not os.path.exists(directory):
         os.makedirs(directory)
 except OSError:
     print ('Error: Creating directory of data')
-
-vidcap = cv2.VideoCapture(video)
-
-fps = vidcap.get(cv2.CAP_PROP_FPS)
-nFrame = fps * float(seconds)
-
-sFrame = 0
-printed = 1
-success, image1 = vidcap.read()
-result = image1
-
-totalScannedFrame=0
-minuti=0
-
-while success:
-    success, image2 = vidcap.read()
-    totalScannedFrame+=1
-
-    #convert image to cv2 to PIL to use rmsdiff function
-    color_converted = cv2.cvtColor(image1, cv2.COLOR_BGR2RGB)
-    im1=Image.fromarray(color_converted)
-    color_converted = cv2.cvtColor(image2, cv2.COLOR_BGR2RGB)
-    im2=Image.fromarray(color_converted)
     
-    if(((totalScannedFrame/fps)/60)%1==0):
-        minuti +=60
-        actualTime= datetime.now().timestamp()
-        difference= actualTime-initTime
-        print("scanned "+ str(minuti)+" seconds in "+str(difference)+" seconds")
+print()
+
+try:
+    if(speed=="fast"):
+        print("Starting with fast mode")
+        fast.fast(directory, video, time, frameDifference)
         
-    difference = rmsdiff(im1, im2)
-    if(difference <= 40):
-       result = equalPart(result, image2)
-       sFrame +=1
-       if(sFrame==nFrame):
-          name = './'+ directory +'/slide' + str(printed) + '.jpg'
-          printed += 1
-          print ('Creating...' + name)
-          cv2.imwrite(name, result)
-       if(sFrame>nFrame):
-          cv2.imwrite(name, result)
-    else:
-        success, image1 = vidcap.read()
-        result = image1
-        sFrame=0
-
-
-
-
-
-
-
-
-
-
-
+    elif(speed=="slow"):
+        print("Starting with slow mode")
+        slow.slow(directory, video, time, frameDifference)
+        
+except Exception:
+    print("unhandled error, please report it on github")
