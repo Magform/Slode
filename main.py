@@ -36,14 +36,14 @@ time = args.time
 frameDifference = args.frame_diffrence
 
 print(art.text2art("Slode"))
-print("A simple tool to grab slide in a video")
+print("A simple tool to grab slide from a video")
 
 #create directory if dont exist
 try:
     if not os.path.exists(directory):
         os.makedirs(directory)
 except OSError:
-    print ('Error: Creating directory of data')
+    exit('Error: Creating directory of data')
     
 print()
 
@@ -57,4 +57,4 @@ try:
         slow.slow(directory, video, time, frameDifference)
         
 except Exception:
-    print("unhandled error, please report it on github")
+    exit("unhandled error, please report it on github")

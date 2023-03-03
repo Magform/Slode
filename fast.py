@@ -13,6 +13,11 @@ def rmsdiff(im1, im2):
     ) / (float(im1.size[0]) * im1.size[1]))
 
 def fast(directory, video, time, frameDifference):
+
+    #check if time is integer
+    if(time%1 != 0 ):
+        exit("Time must be an integer if you are using fast mode")
+    
     vidcap = cv2.VideoCapture(video)
     
     initTime = datetime.now().timestamp()
