@@ -9,6 +9,7 @@ import argparse
 import art
 import sys
 #import other file
+sys.path.append('lib')
 import slow
 import fast
 
